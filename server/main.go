@@ -15,7 +15,6 @@ func main() {
 	r := gin.Default()
 	//database connection
 	db.ConnectingDb()
-	//
 
 	r.Run()
 
