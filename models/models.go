@@ -6,6 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type Status string
+
+const (
+	StatusActive   Status = "active"
+	StatusInactive Status = "inactive"
+	Statusdelered  Status = "deted"
+)
+
 type User struct {
 	ID              string         `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
 	FullName        string         `gorm:"column:fullName;type:varchar(120);not null" json:"fullName"`

@@ -8,8 +8,9 @@ import (
 	"github.com/ingenziart/myapp/models"
 )
 
+// creting new user
 func CreateUser(createDto dto.CreateUserDto) (*models.User, error) {
-	use := models.User{
+	user := models.User{
 		FullName:     createDto.FullName,
 		Email:        createDto.Email,
 		Phone:        createDto.Phone,
@@ -21,23 +22,73 @@ func CreateUser(createDto dto.CreateUserDto) (*models.User, error) {
 
 	//save to db
 
-	if err := db.DB.Create(&use).Error; err != nil {
+	if err := db.DB.Create(&user).Error; err != nil {
 		return nil, err
 
 	}
-	return &use, nil
+	return &user, nil
 
 }
 
+// get use with id
 func GetUserByID(id string) (*models.User, error) {
-	var use models.User
-	if err := db.DB.Where("id=?", id).First(&use); err != nil {
-		return nil, err.Error
+	var user models.User
+	if err := db.DB.First(&user, "id= ?", id).Error; err != nil {
+		return nil, err
 	}
-	return &use, nil
+	return &user, nil
 }
 
-func UpdateUserByID(updateDto dto.UpdateUserDto) (models.User, error) {
-	use := models.User{}
+func UpdateUser(id string, updateDto dto.UpdateUserDto) (*models.User, error) {
+
+	var user models.User
+	//check the existance
+	if err := db.DB.First(&user, "id = ?", id).Error; err != nil {
+		return nil, err
+
+	}
+	//updating
+
+	updates := map[string]interface{}{}
+	if updateDto.FullName != nil {
+		updates["fullName"] = *updateDto.FullName
+
+	}
+	if updateDto.Phone != nil {
+		updates["phone"] = *updateDto.Phone
+	}
+	//save to db
+	if len(updates) > 0 {
+		if err := db.DB.Model(&user).Updates(updates).Error; err != nil {
+			return nil, err
+		}
+
+	}
+	return &user, nil
+
+} // professiona way using model with updates not save it only change the map you created .
+
+func UpdateStatus(id string, StatusDto dto.UpdateStatusDTO) (*models.User, error) {
+	// finfing id
+	var user models.User
+
+	if err := db.DB.First(&user, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	//update status
+	StatusUpdate := map[string]interface{}{}
+
+	if StatusDto.Status != nil {
+		StatusUpdate["status"] = *StatusDto.Status
+
+	}
+	//save to db
+
+	if len(StatusUpdate) > 0 {
+		if err := db.DB.Model(&user).Updates(StatusUpdate).Error; err != nil {
+			return nil, err
+		}
+	}
+	return &user, nil
 
 }
