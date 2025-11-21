@@ -8,7 +8,7 @@ tidy:
 
 # Build binary
 build:
-	go build -o bin/user-service cmd/server/main.go
+	go build -o bin/user-service server/main.go
 
 # Clean binary
 clean:
