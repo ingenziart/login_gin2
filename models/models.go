@@ -6,12 +6,13 @@ import (
 	"gorm.io/gorm"
 )
 
+// this is for validation
 type Status string
 
 const (
 	StatusActive   Status = "active"
 	StatusInactive Status = "inactive"
-	Statusdelered  Status = "deted"
+	StatusDeleted  Status = "deleted"
 )
 
 type User struct {
@@ -21,7 +22,7 @@ type User struct {
 	Phone           string         `gorm:"column:phone;type:varchar(32);not null" json:"phone"`
 	PasswordHash    string         `gorm:"column:password_hash;type:text;not null" json:"password_hash"`
 	Role            string         `gorm:"column:role;type:varchar(32);not null" json:"role"`
-	Status          string         `gorm:"column:status;type:varchar(16);not null" json:"status"`
+	Status          Status         `gorm:"column:status;type:varchar(16);not null" json:"status"`
 	EmailVerifiedAt *time.Time     `gorm:"column:email_verified_at;type:timestamptz" json:"emailVerified_at"`
 	CreatedAt       time.Time      `gorm:"column:created_at;autoCreateTime;not null" json:"created_at"`
 	UpdatedAt       time.Time      `gorm:"column:updated_at;autoUpdateTime;not null" json:"updated_at"`
