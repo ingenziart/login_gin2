@@ -176,25 +176,55 @@ func FindAllUser(page, limit int) (*pagination.PaginationResponse, error) {
 
 }
 
-// soft delete
+// soft deleteFU
 func SoftDeleteUser(id string) error {
-	//check in db
+	//check in db to get id
 	var user models.User
-	if err := db.DB.First(&user, "id = ?", id).Error; err != nil {
+	tx := db.DB.Begin()
+	if err := tx.First(&user, "id = ?", id).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
-	//update status
-	tx := db.DB.Begin()
+	//update in db
 	if err := tx.Model(&user).Update("status", models.StatusDeleted).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	//delete
+	if err := tx.Delete(&user).Error; err != nil {
 		tx.Rollback()
 		return err
 
 	}
-	//soft delete
-	if err := tx.Delete(&user).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
 	return tx.Commit().Error
+
+}
+
+//restore
+
+func RestoreUser(id string) (*models.User, error) {
+	//check in db even deleted one using unscope func
+	var user models.User
+	if err := db.DB.Unscoped().First(&user, "id = ?", id).Error; err != nil {
+		return nil, err
+
+	}
+	//the field of gorm.deletedAT
+	if !user.DeletedAt.Valid {
+		return &user, nil
+	}
+	//remove deleteAt
+	tx := db.DB.Begin()
+	if err := tx.Model(&user).Update("deleted_at", nil).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	//update status
+
+	if err := tx.Model(&user).Update("status", models.StatusActive).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	return &user, tx.Commit().Error
 
 }
