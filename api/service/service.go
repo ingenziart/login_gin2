@@ -7,7 +7,6 @@ import (
 	"github.com/ingenziart/myapp/api/dto"
 	"github.com/ingenziart/myapp/db"
 	"github.com/ingenziart/myapp/models"
-	customErr "github.com/ingenziart/myapp/utils/errors"
 	"github.com/ingenziart/myapp/utils/pagination"
 	"github.com/ingenziart/myapp/utils/validation"
 )
@@ -61,7 +60,7 @@ func UpdateUser(id string, updateDto dto.UpdateUserDto) (*models.User, error) {
 	}
 	//check nill
 	if updateDto.FullName == nil && updateDto.Phone == nil {
-		return nil, customErr.ErrNoFieldToUpdate
+		return nil, fmt.Errorf("filed required")
 	}
 	//updating
 
@@ -77,7 +76,7 @@ func UpdateUser(id string, updateDto dto.UpdateUserDto) (*models.User, error) {
 	//save to db
 	if len(updates) > 0 {
 		if err := db.DB.Model(&user).Updates(updates).Error; err != nil {
-			return nil, customErr.ErrNoFieldToUpdate
+			return nil, err
 		}
 
 	}
@@ -105,16 +104,10 @@ func UpdateUserStatus(id string, dto dto.UpdateStatusDTO) (*models.User, error) 
 		return nil, fmt.Errorf("invalid status ")
 	}
 
-	//save to db
-	updates := map[string]interface{}{
-		"status": newStatus,
-	}
+	//save the update db
 
-	//save to db
-	if len(updates) > 0 {
-		if err := db.DB.Model(&user).Updates(updates).Error; err != nil {
-			return nil, err
-		}
+	if err := db.DB.Model(&user).Update("status", newStatus).Error; err != nil {
+		return nil, err
 
 	}
 	return &user, nil
