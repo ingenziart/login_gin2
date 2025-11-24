@@ -175,3 +175,26 @@ func FindAllUser(page, limit int) (*pagination.PaginationResponse, error) {
 	}, nil
 
 }
+
+// soft delete
+func SoftDeleteUser(id string) error {
+	//check in db
+	var user models.User
+	if err := db.DB.First(&user, "id = ?", id).Error; err != nil {
+		return err
+	}
+	//update status
+	tx := db.DB.Begin()
+	if err := tx.Model(&user).Update("status", models.StatusDeleted).Error; err != nil {
+		tx.Rollback()
+		return err
+
+	}
+	//soft delete
+	if err := tx.Delete(&user).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit().Error
+
+}
