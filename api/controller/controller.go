@@ -72,4 +72,6 @@ func UpdateUserStatus(c *gin.Context) {
 
 	var inputs dto.UpdateStatusDTO
 
+	ref,err:=
+
 }
