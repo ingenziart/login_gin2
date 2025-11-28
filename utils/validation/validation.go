@@ -36,30 +36,30 @@ func getValidationErrorMessage(field string, tag string, param string) string {
 
 }
 
-func ValidationErrorResponse(c *gin.Context, err error) {
-
+func ValidationErrorMessage(c *gin.Context, err error) {
 	var validationErrors []string
 
-	// Check if it's a validator error
 	if validationErrs, ok := err.(validator.ValidationErrors); ok {
-		for _, fieldErr := range validationErrs {
-			msg := getValidationErrorMessage(fieldErr.Field(), fieldErr.Tag(), fieldErr.Param())
-			validationErrors = append(validationErrors, msg)
+		//check if it error and sssign it to error message
+		for _, fieldError := range validationErrs {
+			message := getValidationErrorMessage(fieldError.Field(), fieldError.Tag(), fieldError.Param())
+			validationErrors = append(validationErrors, message)
+
 		}
 	} else {
-		// Non-validation error
+		//non valodator error (different error )
 		validationErrors = append(validationErrors, err.Error())
 	}
-
-	// Send the error response
 	response.ResponceError(c, http.StatusBadRequest, strings.Join(validationErrors, ", "))
 }
+
 func ValidateStruct(c *gin.Context, s interface{}) bool {
-	validate := validator.New()
+	validate := validator.New() //CREATE VALIDATION
+
 	err := validate.Struct(s)
 	if err != nil {
-		ValidationErrorResponse(c, err)
+		ValidationErrorMessage(c, err)
 		return false
-	}
+	} //USE STRUCT
 	return true
 }
