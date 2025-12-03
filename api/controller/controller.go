@@ -1,77 +1,29 @@
 package controller
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/ingenziart/myapp/api/dto"
 	"github.com/ingenziart/myapp/api/service"
-	"github.com/ingenziart/myapp/utils/response"
+	"github.com/ingenziart/myapp/utils/validation"
 )
 
 func CreateUser(c *gin.Context) {
-	var inputs dto.CreateUserDto
-	if err := c.ShouldBind(&inputs); err != nil {
-		response.ResponceError(c, http.StatusBadRequest, err.Error())
+	var input dto.CreateUserDto
+	if err := c.ShouldBindJSON(&input); err != nil {
+		validation.ValidationErrorResponse(c, err)
 		return
-
 	}
 
-	user, err := service.CreateUser(inputs)
+	if !validation.ValidateStruct(c, &input) {
+		return
+	}
 
+	user, err := service.CreateUser(input)
 	if err != nil {
-		response.ResponceError(c, http.StatusInternalServerError, err.Error())
+		response.ResponseError(c, 400, err.Error())
 		return
 	}
 
-	response.ResponceSucess(c, http.StatusCreated, user)
-
-}
-
-func GetAllUser(c *gin.Context) {
-
-	user, err := service.GetAllUser()
-	if err != nil {
-		response.ResponceError(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-	response.ResponceSucess(c, http.StatusOK, user)
-
-}
-
-func GetUserByID(c *gin.Context) {
-	id := c.Param("id")
-	user, err := service.GetUserByID(id)
-	if err != nil {
-		response.ResponceError(c, http.StatusInternalServerError, err.Error())
-	}
-	response.ResponceSucess(c, http.StatusOK, user)
-}
-
-func UpdateUser(c *gin.Context) {
-	id := c.Param("id")
-
-	var inputs dto.UpdateUserDto
-
-	if err := c.ShouldBind(&inputs); err != nil {
-		response.ResponceError(c, http.StatusNotAcceptable, err.Error())
-		return
-	}
-	user, err := service.UpdateUser(id, inputs)
-
-	if err != nil {
-		response.ResponceError(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-	response.ResponceSucess(c, http.StatusOK, user)
-
-}
-
-func UpdateUserStatus(c *gin.Context) {
-	id := c.Param("id")
-
-	var inputs dto.UpdateStatusDTO
-
-	ref,err:=
+	response.ResponseSuccess(c, user, "User created")
 
 }

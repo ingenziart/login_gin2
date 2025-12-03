@@ -7,19 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/ingenziart/myapp/models"
 	"github.com/ingenziart/myapp/utils/response"
 )
-
-func IsValidateStatus(s models.Status) bool {
-	switch s {
-	case models.StatusActive, models.StatusInactive, models.StatusDeleted:
-		return true
-
-	}
-	return false
-
-}
 
 func getValidationErrorMessage(field string, tag string, param string) string {
 	switch tag {
