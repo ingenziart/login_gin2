@@ -34,3 +34,5 @@ func CreateUser(c *gin.Context) {
 	// 4. Success response
 	response.ResponseSucess(c, user, "User created successfully")
 }
+
+func GetAllUser()
