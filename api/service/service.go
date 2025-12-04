@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"strings"
 
@@ -10,18 +9,18 @@ import (
 	"github.com/ingenziart/myapp/db"
 	"github.com/ingenziart/myapp/models"
 	"github.com/ingenziart/myapp/utils/pagination"
-	"github.com/ingenziart/myapp/utils/validation"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 var (
-	ErrEmailInUse   = errors.New("email already in use")
-	ErrHashPassword = errors.New("failed to hash password")
-	ErrCreateUser   = errors.New("failed to create user")
-	ErrStatus       = errors.New("invalid status")
-	ErrRole         = errors.New("invalid role")
-	ErrUserNotFound = errors.New("user not found")
+	ErrEmailInUse    = errors.New("email already in use")
+	ErrHashPassword  = errors.New("failed to hash password")
+	ErrCreateUser    = errors.New("failed to create user")
+	ErrStatus        = errors.New("invalid status")
+	ErrRole          = errors.New("invalid role")
+	ErrUserNotFound  = errors.New("user not found")
+	ErrFieldToUpdate = errors.New("no fielad  to update ")
 )
 
 // creting new user
@@ -116,16 +115,20 @@ func UpdateUser(id string, updateDto dto.UpdateUserDto) (*models.User, error) {
 	updates := map[string]interface{}{}
 
 	//update info
+	if updateDto.FullName != nil {
+		updates["fullName"] = strings.TrimSpace(*updateDto.FullName)
+	}
 
 	if updateDto.Email != nil {
 
 		//check if email is not used before
 		var temp models.User
 		email := strings.TrimSpace(strings.ToLower(*updateDto.Email))
-		if err := db.DB.Where("email = ? and id <>", email, id).Find(&temp).Error; err != nil {
+		if err := db.DB.Where("email = ? AND id <> ?", email, id).First(&temp).Error; err == nil {
 			return nil, ErrEmailInUse
 
 		}
+		updates["email"] = email
 
 	}
 	//password
@@ -134,40 +137,63 @@ func UpdateUser(id string, updateDto dto.UpdateUserDto) (*models.User, error) {
 		if err != nil {
 			return nil, ErrHashPassword
 		}
-		updates["password"] = hashed
+		updates["password"] = string(hashed)
 
 	}
 
-	//update
+	//update role
+	if updateDto.Role != nil {
+		role := models.Role(*updateDto.Role)
+
+		if !role.IsValid() {
+			return nil, ErrRole
+
+		}
+		updates["role"] = role
+
+	}
+	if len(updates) == 0 {
+		return nil, ErrFieldToUpdate
+	}
+	//updates to db
+	if err := db.DB.Model(&user).Updates(updates).Error; err != nil {
+		return nil, err
+
+	}
+	return &user, nil
 
 }
 
 func UpdateUserStatus(id string, dto dto.UpdateStatusDTO) (*models.User, error) {
-	//chech the current status
+
 	var user models.User
 
-	if dto.Status == nil {
-		return nil, fmt.Errorf("status required")
-	}
-
 	//check id to update
-	if err := db.DB.First(&user, "id= ?", id).Error; err != nil {
-		return nil, err
-	}
-	//validate new status
-
-	newStatus := models.Status(*dto.Status)
-
-	if !validation.IsValidateStatus(newStatus) {
-		return nil, fmt.Errorf("invalid status ")
-	}
-
-	//save the update db
-
-	if err := db.DB.Model(&user).Update("status", newStatus).Error; err != nil {
+	if err := db.DB.First(&user, "id = ?", id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUserNotFound
+		}
 		return nil, err
 
 	}
+	if dto.Status == nil {
+		return nil, ErrFieldToUpdate
+	}
+	status := models.Status(*dto.Status)
+
+	if !status.IsValid() {
+		return nil, ErrStatus
+
+	}
+	updateStatus := map[string]interface{}{
+		"status": status,
+	}
+
+	if err := db.DB.Model(&user).Updates(updateStatus).Error; err != nil {
+		return nil, err
+
+	}
+
 	return &user, nil
 
 }
