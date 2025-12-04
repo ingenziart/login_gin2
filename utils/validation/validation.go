@@ -39,7 +39,7 @@ func ValidationErrorMessage(c *gin.Context, err error) {
 		//non valodator error (different error )
 		validationErrors = append(validationErrors, err.Error())
 	}
-	response.ResponceError(c, http.StatusBadRequest, strings.Join(validationErrors, ", "))
+	response.ResponseError(c, http.StatusBadRequest, strings.Join(validationErrors, ", "))
 }
 
 func ValidateStruct(c *gin.Context, s interface{}) bool {

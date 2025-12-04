@@ -1,29 +1,36 @@
 package controller
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/ingenziart/myapp/api/dto"
 	"github.com/ingenziart/myapp/api/service"
+	"github.com/ingenziart/myapp/utils/response"
 	"github.com/ingenziart/myapp/utils/validation"
 )
 
 func CreateUser(c *gin.Context) {
-	var input dto.CreateUserDto
-	if err := c.ShouldBindJSON(&input); err != nil {
-		validation.ValidationErrorResponse(c, err)
+	var inputs dto.CreateUserDto
+
+	// 1. Bind JSON
+	if err := c.ShouldBindJSON(&inputs); err != nil {
+		validation.ValidationErrorMessage(c, err)
 		return
 	}
 
-	if !validation.ValidateStruct(c, &input) {
+	// 2. Validate DTO fields
+	if !validation.ValidateStruct(c, inputs) {
 		return
 	}
 
-	user, err := service.CreateUser(input)
+	// 3. Call service
+	user, err := service.CreateUser(inputs)
 	if err != nil {
-		response.ResponseError(c, 400, err.Error())
+		response.ResponseError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	response.ResponseSuccess(c, user, "User created")
-
+	// 4. Success response
+	response.ResponseSucess(c, user, "User created successfully")
 }
