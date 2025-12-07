@@ -52,5 +52,6 @@ func ValidateStruct(c *gin.Context, s interface{}) bool {
 		return false
 
 	}
+	return true
 
 }

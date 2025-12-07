@@ -53,5 +53,35 @@ func GetUserByID(c *gin.Context) {
 
 func UpdateUser(c *gin.Context) {
 	id := c.Param("id")
+	var inputs dto.UpdateUserDto
+
+	if err := c.ShouldBindJSON(&inputs); err != nil {
+		response.ResponseError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	//validate
+	if !validation.ValidateStruct(c, inputs) {
+		return
+	}
+
+	user, err := service.UpdateUser(id, inputs)
+
+	if err != nil {
+		if err == service.ErrUserNotFound {
+			response.ResponseError(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		if err == service.ErrEmailInUse {
+			response.ResponseError(c, http.StatusConflict, err.Error())
+			return
+		}
+		if err == service.ErrHashPassword {
+			response.ResponseError(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+	}
+	response.ResponseSucess(c, user, "successfully updated")
 
 }
