@@ -43,12 +43,14 @@ func ValidationErrorMessage(c *gin.Context, err error) {
 }
 
 func ValidateStruct(c *gin.Context, s interface{}) bool {
-	validate := validator.New() //CREATE VALIDATION
+	validate := validator.New()
 
 	err := validate.Struct(s)
+
 	if err != nil {
 		ValidationErrorMessage(c, err)
 		return false
-	} //USE STRUCT
-	return true
+
+	}
+
 }

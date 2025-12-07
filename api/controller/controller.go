@@ -11,28 +11,47 @@ import (
 )
 
 func CreateUser(c *gin.Context) {
+	//read
 	var inputs dto.CreateUserDto
-
-	// 1. Bind JSON
 	if err := c.ShouldBindJSON(&inputs); err != nil {
-		validation.ValidationErrorMessage(c, err)
-		return
-	}
-
-	// 2. Validate DTO fields
-	if !validation.ValidateStruct(c, inputs) {
-		return
-	}
-
-	// 3. Call service
-	user, err := service.CreateUser(inputs)
-	if err != nil {
 		response.ResponseError(c, http.StatusBadRequest, err.Error())
 		return
 	}
+	//validation
+	if !validation.ValidateStruct(c, inputs) {
+		return
 
-	// 4. Success response
-	response.ResponseSucess(c, user, "User created successfully")
+	}
+	//calling service
+
+	user, err := service.CreateUser(inputs)
+
+	if err != nil {
+		response.ResponseError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.ResponseSucess(c, user, "user created successfully")
+
 }
 
-func GetAllUser()
+func GetUserByID(c *gin.Context) {
+	id := c.Param("id")
+
+	user, err := service.GetUserByID(id)
+
+	if err != nil {
+		if err == service.ErrUserNotFound {
+			response.ResponseError(c, http.StatusNotFound, err.Error())
+			return
+		}
+		response.ResponseError(c, http.StatusInternalServerError, err.Error())
+		return
+
+	}
+	response.ResponseSucess(c, user, "success")
+}
+
+func UpdateUser(c *gin.Context) {
+	id := c.Param("id")
+
+}
