@@ -1,0 +1,84 @@
+definitions:
+  dto.CreateUserDto:
+    properties:
+      email:
+        type: string
+      fullName:
+        minLength: 3
+        type: string
+      password:
+        minLength: 4
+        type: string
+      phone:
+        minLength: 10
+        type: string
+      role:
+        enum:
+        - admin
+        - user
+        - guest
+        type: string
+      status:
+        enum:
+        - active
+        - inactive
+        - deleted
+        type: string
+    required:
+    - email
+    - fullName
+    - password
+    - phone
+    - role
+    - status
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      error:
+        type: string
+      message: {}
+      status:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with full name, email, password, phone, status,
+        and role.
+      parameters:
+      - description: User info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create a new user
+      tags:
+      - Users
+swagger: "2.0"

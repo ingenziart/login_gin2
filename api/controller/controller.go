@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ingenziart/myapp/api/dto"
@@ -10,6 +11,18 @@ import (
 	"github.com/ingenziart/myapp/utils/validation"
 )
 
+// CreateUser godoc
+// @Summary Create a new user
+// @Description Create a new user with full name, email, password, phone, status, and role.
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param user body dto.CreateUserDto true "User info"
+// @Success 201 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 409 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /users [post]
 func CreateUser(c *gin.Context) {
 	//read
 	var inputs dto.CreateUserDto
@@ -84,4 +97,30 @@ func UpdateUser(c *gin.Context) {
 	}
 	response.ResponseSucess(c, user, "successfully updated")
 
+}
+
+func FindAllUser(c *gin.Context) {
+	pageNumber := c.DefaultQuery("page", "1")
+	pageSize := c.DefaultQuery("limit", "10")
+
+	page, err := strconv.Atoi(pageNumber)
+
+	if err != nil || page < 1 {
+		response.ResponseError(c, http.StatusBadRequest, "invalid page number")
+		return
+	}
+	limit, err := strconv.Atoi(pageSize)
+
+	if err != nil || limit < 10 {
+		response.ResponseError(c, http.StatusBadRequest, "invalid page size")
+		return
+
+	}
+	user, err := service.FindAllUser(page, limit)
+
+	if err != nil {
+		response.ResponseError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.ResponseSucess(c, user, "users retrieved successfully")
 }

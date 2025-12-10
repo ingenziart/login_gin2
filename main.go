@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ingenziart/myapp/config"
 	"github.com/ingenziart/myapp/db"
-	_ "github.com/ingenziart/myapp/docs"
 )
 
 // function to load env
