@@ -98,7 +98,6 @@ func UpdateUser(c *gin.Context) {
 	response.ResponseSucess(c, user, "successfully updated")
 
 }
-
 func FindAllUser(c *gin.Context) {
 	pageNumber := c.DefaultQuery("page", "1")
 	pageSize := c.DefaultQuery("limit", "10")
