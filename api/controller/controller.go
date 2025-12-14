@@ -47,6 +47,17 @@ func CreateUser(c *gin.Context) {
 
 }
 
+// GetUserByID godoc
+// @Summary Get a single user by ID
+// @Description Fetch a user by their unique ID
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Success 200 {object} response.Response "User retrieved successfully"
+// @Failure 404 {object} response.Response "User not found"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /users/{id} [get]
 func GetUserByID(c *gin.Context) {
 	id := c.Param("id")
 
@@ -64,6 +75,20 @@ func GetUserByID(c *gin.Context) {
 	response.ResponseSucess(c, user, "success")
 }
 
+// UpdateUser godoc
+// @Summary Update an existing user
+// @Description Update user details by providing a valid user ID and request body
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Param user body dto.UpdateUserDto true "Update user payload"
+// @Success 200 {object} response.Response "User updated successfully"
+// @Failure 400 {object} response.Response "Invalid request body"
+// @Failure 404 {object} response.Response "User not found"
+// @Failure 409 {object} response.Response "Email already in use"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /users/{id} [put]
 func UpdateUser(c *gin.Context) {
 	id := c.Param("id")
 	var inputs dto.UpdateUserDto
@@ -98,6 +123,19 @@ func UpdateUser(c *gin.Context) {
 	response.ResponseSucess(c, user, "successfully updated")
 
 }
+
+// FindAllUser godoc
+// @Summary Get all users with pagination
+// @Description Retrieve a paginated list of all users
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number (default: 1)"
+// @Param limit query int false "Items per page (default: 10)"
+// @Success 200 {object} response.Response "Users retrieved successfully"
+// @Failure 400 {object} response.Response "Invalid pagination parameters"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /users [get]
 func FindAllUser(c *gin.Context) {
 	pageNumber := c.DefaultQuery("page", "1")
 	pageSize := c.DefaultQuery("limit", "10")
