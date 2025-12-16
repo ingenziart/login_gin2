@@ -150,6 +150,34 @@ paths:
       tags:
       - Users
   /users/{id}:
+    delete:
+      description: Marks a user as deleted without removing it from the database
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: User already deleted
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Soft delete a user
+      tags:
+      - Users
     get:
       consumes:
       - application/json
@@ -210,6 +238,39 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: Update user
+      tags:
+      - Users
+  /users/{id}/restore:
+    patch:
+      consumes:
+      - application/json
+      description: Restore a user whose status is set to deleted
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User restored successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: User is not deleted
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Restore a deleted user
       tags:
       - Users
 schemes:

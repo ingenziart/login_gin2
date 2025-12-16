@@ -17,4 +17,10 @@ func UserRoutes(api *gin.RouterGroup) {
 	//update user by id
 	users.PATCH("/:id", controller.UpdateUser)
 
+	//soft delete
+	users.DELETE("/:id", controller.SoftDeleteUser)
+
+	//restore delete
+	users.PATCH("/:id/restore", controller.RestoreUser)
+
 }

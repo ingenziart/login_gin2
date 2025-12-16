@@ -22,6 +22,7 @@ var (
 	ErrUserNotFound       = errors.New("user not found")
 	ErrFieldToUpdate      = errors.New("no fielad  to update ")
 	ErrUserAlreadyDeleted = errors.New("user already deleted")
+	ErrUserNotDeleted     = errors.New("user not deleted")
 )
 
 // creting new user
@@ -292,28 +293,27 @@ func SoftDeleteUser(id string) error {
 //restore
 
 func RestoreUser(id string) (*models.User, error) {
-	//check in db even deleted one using unscope func
-	var user models.User
-	if err := db.DB.Unscoped().First(&user, "id = ?", id).Error; err != nil {
+	var users models.User
+
+	//check in db
+	err := db.DB.First(&users, "id = ?", id).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUserNotFound
+		}
 		return nil, err
 
 	}
-	//the field of gorm.deletedAT
-	if !user.DeletedAt.Valid {
-		return &user, nil
-	}
-	//remove deleteAt
-	tx := db.DB.Begin()
-	if err := tx.Model(&user).Update("deleted_at", nil).Error; err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-	//update status
 
-	if err := tx.Model(&user).Update("status", models.StatusActive).Error; err != nil {
-		tx.Rollback()
+	//if there is nothing to restore
+	if users.Status != models.StatusDeleted {
+		return nil, ErrUserNotDeleted
+	}
+	//update
+	if err := db.DB.Model(&users).Update("status", models.StatusActive).Error; err != nil {
 		return nil, err
 	}
-	return &user, tx.Commit().Error
+	return &users, nil
 
 }

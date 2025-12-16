@@ -160,6 +160,16 @@ func FindAllUser(c *gin.Context) {
 	response.ResponseSucess(c, user, "users retrieved successfully")
 }
 
+// SoftDeleteUser godoc
+// @Summary Soft delete a user
+// @Description Marks a user as deleted without removing it from the database
+// @Tags Users
+// @Param id path string true "User ID"
+// @Success 200 {object} response.Response "User deleted successfully"
+// @Failure 404 {object} response.Response "User not found"
+// @Failure 409 {object} response.Response "User already deleted"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /users/{id} [delete]
 func SoftDeleteUser(c *gin.Context) {
 	id := c.Param("id")
 
@@ -168,13 +178,50 @@ func SoftDeleteUser(c *gin.Context) {
 	if err != nil {
 		if err == service.ErrUserNotFound {
 			response.ResponseError(c, http.StatusNotFound, err.Error())
+			return
 		}
 		if err == service.ErrUserAlreadyDeleted {
 			response.ResponseError(c, http.StatusConflict, err.Error())
+			return
 		}
 		response.ResponseError(c, http.StatusInternalServerError, err.Error())
 
 	}
 	response.ResponseSucess(c, nil, "user deleted successfully")
+
+}
+
+// RestoreUser restores a soft-deleted user
+// @Summary Restore a deleted user
+// @Description Restore a user whose status is set to deleted
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Success 200 {object} response.Response "User restored successfully"
+// @Failure 404 {object} response.Response "User not found"
+// @Failure 409 {object} response.Response "User is not deleted"
+// @Failure 500 {object} response.Response "Internal server error"
+// @Router /users/{id}/restore [patch]
+func RestoreUser(c *gin.Context) {
+	id := c.Param("id")
+
+	//call the service
+	user, err := service.RestoreUser(id)
+
+	if err != nil {
+		if err == service.ErrUserNotFound {
+			response.ResponseError(c, http.StatusNotFound, err.Error())
+			return
+		}
+		if err == service.ErrUserNotDeleted {
+			response.ResponseError(c, http.StatusConflict, err.Error())
+			return
+		}
+		response.ResponseError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.ResponseSucess(c, user, "successfully restored")
 
 }
