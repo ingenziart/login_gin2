@@ -44,7 +44,7 @@ type User struct {
 	FullName        string         `gorm:"column:fullName;type:varchar(120);not null" json:"fullName"`
 	Email           string         `gorm:"column:email;type:citext;unique;not null" json:"email"`
 	Phone           string         `gorm:"column:phone;type:varchar(32);not null" json:"phone"`
-	PasswordHash    string         `gorm:"column:password_hash;type:text;not null" json:"password_hash"`
+	PasswordHash    string         `gorm:"column:password_hash;type:text;not null" json:"-"`
 	Role            Role           `gorm:"column:role;type:varchar(32);not null" json:"role"`
 	Status          Status         `gorm:"column:status;type:varchar(16);not null" json:"status"`
 	EmailVerifiedAt *time.Time     `gorm:"column:email_verified_at;type:timestamptz" json:"emailVerified_at"`

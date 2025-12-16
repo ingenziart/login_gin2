@@ -1,6 +1,6 @@
 # Run the server
 run:
-	go run server/main.go
+	go run main.go
 
 # Fix dependencies
 tidy:
@@ -8,7 +8,7 @@ tidy:
 
 # Build binary
 build:
-	go build -o bin/user-service server/main.go
+	go build -o bin/user-service main.go
 
 # Clean binary
 clean:

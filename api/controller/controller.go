@@ -75,20 +75,18 @@ func GetUserByID(c *gin.Context) {
 	response.ResponseSucess(c, user, "success")
 }
 
-// UpdateUser godoc
-// @Summary Update an existing user
-// @Description Update user details by providing a valid user ID and request body
+// UpdateUserStatus godoc
+// @Summary Update a user's status
+// @Description Set user's status by ID (body has the new status)
 // @Tags Users
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
-// @Param user body dto.UpdateUserDto true "Update user payload"
-// @Success 200 {object} response.Response "User updated successfully"
-// @Failure 400 {object} response.Response "Invalid request body"
-// @Failure 404 {object} response.Response "User not found"
-// @Failure 409 {object} response.Response "Email already in use"
-// @Failure 500 {object} response.Response "Internal server error"
-// @Router /users/{id} [put]
+// @Param body body dto.UpdateStatusDTO true "New status (active|inactive|deleted)"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Router /users/{id}/status [patch]
 func UpdateUser(c *gin.Context) {
 	id := c.Param("id")
 	var inputs dto.UpdateUserDto

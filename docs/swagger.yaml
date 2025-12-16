@@ -1,3 +1,4 @@
+basePath: /api/v1
 definitions:
   dto.CreateUserDto:
     properties:
@@ -32,6 +33,17 @@ definitions:
     - role
     - status
     type: object
+  dto.UpdateStatusDTO:
+    properties:
+      status:
+        enum:
+        - active
+        - inactive
+        - deleted
+        type: string
+    required:
+    - status
+    type: object
   response.Response:
     properties:
       data: {}
@@ -43,10 +55,51 @@ definitions:
       statusCode:
         type: integer
     type: object
+host: localhost:8080
 info:
-  contact: {}
+  contact:
+    email: aimembabazi15@gmail.com
+    name: aime
+  description: API documentation for the User Service built with Go, Gin, and GORM.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Go Gin User Service API
+  version: "1.0"
 paths:
   /users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of all users
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users retrieved successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid pagination parameters
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get all users with pagination
+      tags:
+      - Users
     post:
       consumes:
       - application/json
@@ -81,4 +134,70 @@ paths:
       summary: Create a new user
       tags:
       - Users
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Fetch a user by their unique ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User retrieved successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get a single user by ID
+      tags:
+      - Users
+  /users/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Set user's status by ID (body has the new status)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status (active|inactive|deleted)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateStatusDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update a user's status
+      tags:
+      - Users
+schemes:
+- http
 swagger: "2.0"

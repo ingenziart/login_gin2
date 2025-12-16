@@ -5,16 +5,16 @@ import (
 	"github.com/ingenziart/myapp/api/controller"
 )
 
-func UserRoutes(r *gin.Engine) {
-	api := r.Group("/user")
+func UserRoutes(api *gin.RouterGroup) {
+	users := api.Group("/users")
 
 	//post create user
-	api.POST("/", controller.CreateUser)
+	users.POST("", controller.CreateUser)
 	//GET all user
-	api.GET("/", controller.FindAllUser)
+	users.GET("", controller.FindAllUser)
 	//GET user by id
-	api.GET("/:id", controller.GetUserByID)
+	users.GET("/:id", controller.GetUserByID)
 	//update user by id
-	api.PATCH("/:id", controller.UpdateUser)
+	users.PATCH("/:id", controller.UpdateUser)
 
 }
