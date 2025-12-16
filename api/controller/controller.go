@@ -75,18 +75,18 @@ func GetUserByID(c *gin.Context) {
 	response.ResponseSucess(c, user, "success")
 }
 
-// UpdateUserStatus godoc
-// @Summary Update a user's status
-// @Description Set user's status by ID (body has the new status)
+// UpdateUser godoc
+// @Summary Update user
+// @Description Update user fields by ID
 // @Tags Users
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
-// @Param body body dto.UpdateStatusDTO true "New status (active|inactive|deleted)"
+// @Param user body dto.UpdateUserDto true "Fields to update (partial allowed)"
 // @Success 200 {object} response.Response
 // @Failure 400 {object} response.Response
 // @Failure 404 {object} response.Response
-// @Router /users/{id}/status [patch]
+// @Router /users/{id} [patch]
 func UpdateUser(c *gin.Context) {
 	id := c.Param("id")
 	var inputs dto.UpdateUserDto
@@ -158,4 +158,23 @@ func FindAllUser(c *gin.Context) {
 		return
 	}
 	response.ResponseSucess(c, user, "users retrieved successfully")
+}
+
+func SoftDeleteUser(c *gin.Context) {
+	id := c.Param("id")
+
+	//call service
+	err := service.SoftDeleteUser(id)
+	if err != nil {
+		if err == service.ErrUserNotFound {
+			response.ResponseError(c, http.StatusNotFound, err.Error())
+		}
+		if err == service.ErrUserAlreadyDeleted {
+			response.ResponseError(c, http.StatusConflict, err.Error())
+		}
+		response.ResponseError(c, http.StatusInternalServerError, err.Error())
+
+	}
+	response.ResponseSucess(c, nil, "user deleted successfully")
+
 }

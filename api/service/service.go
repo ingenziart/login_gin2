@@ -14,13 +14,14 @@ import (
 )
 
 var (
-	ErrEmailInUse    = errors.New("email already in use")
-	ErrHashPassword  = errors.New("failed to hash password")
-	ErrCreateUser    = errors.New("failed to create user")
-	ErrStatus        = errors.New("invalid status")
-	ErrRole          = errors.New("invalid role")
-	ErrUserNotFound  = errors.New("user not found")
-	ErrFieldToUpdate = errors.New("no fielad  to update ")
+	ErrEmailInUse         = errors.New("email already in use")
+	ErrHashPassword       = errors.New("failed to hash password")
+	ErrCreateUser         = errors.New("failed to create user")
+	ErrStatus             = errors.New("invalid status")
+	ErrRole               = errors.New("invalid role")
+	ErrUserNotFound       = errors.New("user not found")
+	ErrFieldToUpdate      = errors.New("no fielad  to update ")
+	ErrUserAlreadyDeleted = errors.New("user already deleted")
 )
 
 // creting new user
@@ -258,9 +259,20 @@ func SoftDeleteUser(id string) error {
 	//check in db to get id
 	var user models.User
 	tx := db.DB.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
 	if err := tx.First(&user, "id = ?", id).Error; err != nil {
 		tx.Rollback()
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrUserNotFound
+		}
 		return err
+	}
+	//prevent double delete
+	if user.Status == models.StatusDeleted {
+		tx.Rollback()
+		return ErrUserAlreadyDeleted
 	}
 	//update in db
 	if err := tx.Model(&user).Update("status", models.StatusDeleted).Error; err != nil {
@@ -268,11 +280,11 @@ func SoftDeleteUser(id string) error {
 		return err
 	}
 	//delete
-	if err := tx.Delete(&user).Error; err != nil {
+	/*if err := tx.Delete(&user).Error; err != nil {
 		tx.Rollback()
 		return err
 
-	}
+	}*/
 	return tx.Commit().Error
 
 }

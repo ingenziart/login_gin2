@@ -164,11 +164,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/users/{id}/status": {
+            },
             "patch": {
-                "description": "Set user's status by ID (body has the new status)",
+                "description": "Update user fields by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -178,7 +176,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Update a user's status",
+                "summary": "Update user",
                 "parameters": [
                     {
                         "type": "string",
@@ -188,12 +186,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "New status (active|inactive|deleted)",
-                        "name": "body",
+                        "description": "Fields to update (partial allowed)",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateStatusDTO"
+                            "$ref": "#/definitions/dto.UpdateUserDto"
                         }
                     }
                 ],
@@ -265,12 +263,32 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateStatusDTO": {
+        "dto.UpdateUserDto": {
             "type": "object",
-            "required": [
-                "status"
-            ],
             "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "fullName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 4
+                },
+                "phone": {
+                    "type": "string",
+                    "minLength": 10
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "admin",
+                        "user",
+                        "guest"
+                    ]
+                },
                 "status": {
                     "type": "string",
                     "enum": [

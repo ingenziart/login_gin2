@@ -33,16 +33,31 @@ definitions:
     - role
     - status
     type: object
-  dto.UpdateStatusDTO:
+  dto.UpdateUserDto:
     properties:
+      email:
+        type: string
+      fullName:
+        minLength: 3
+        type: string
+      password:
+        minLength: 4
+        type: string
+      phone:
+        minLength: 10
+        type: string
+      role:
+        enum:
+        - admin
+        - user
+        - guest
+        type: string
       status:
         enum:
         - active
         - inactive
         - deleted
         type: string
-    required:
-    - status
     type: object
   response.Response:
     properties:
@@ -163,23 +178,22 @@ paths:
       summary: Get a single user by ID
       tags:
       - Users
-  /users/{id}/status:
     patch:
       consumes:
       - application/json
-      description: Set user's status by ID (body has the new status)
+      description: Update user fields by ID
       parameters:
       - description: User ID
         in: path
         name: id
         required: true
         type: string
-      - description: New status (active|inactive|deleted)
+      - description: Fields to update (partial allowed)
         in: body
-        name: body
+        name: user
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdateStatusDTO'
+          $ref: '#/definitions/dto.UpdateUserDto'
       produces:
       - application/json
       responses:
@@ -195,7 +209,7 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/response.Response'
-      summary: Update a user's status
+      summary: Update user
       tags:
       - Users
 schemes:
